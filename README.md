@@ -4,7 +4,7 @@ This repository contains the web service code for the POD-web project. POD-Web a
 
 This service depends on the `pod-web-scheduler` repository for job submissions to function correctly.
 
-The repostory for `slurm_scheduler` can be found here: https://github.com/Hogeboontl/POD-web-scheduler
+The repostory for `pod-web-scheduler` can be found here: https://github.com/Hogeboontl/POD-web-scheduler
 
 ---
 

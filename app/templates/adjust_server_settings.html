@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title%} POD post processing {% endblock %}
+
+{% block content %}
+
+<div id = "column">
+    <div id = "row">
+        <p> Please select the number of cores to use: </p>
+        <select id="core-selection" >
+            {% for value in core_values %}
+            <option value="{{ value }}"
+                {% if value == curr_core %}selected{% endif %}>
+                {{ value }}
+            </option>
+            {%endfor%}
+        </select>
+    </div>
+        <div id = "row">
+        <p> please select the amount of ram you would like to use (GB): </p>
+        <input id = "ram_input" type ="number"class = "no-spinner" inputmode="numeric" data-ram-max="{{ RAM_MAX}}" min = "1" max = "{{MAX_RAM}}" value = "{{curr_mem}}" />
+    </div>
+    <p id = "error-text" class = "error"></p>
+
+    <input type = "submit" value ="save changes" id = "save"> 
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/update_server_conf.js') }}"></script>
+{% endblock %}

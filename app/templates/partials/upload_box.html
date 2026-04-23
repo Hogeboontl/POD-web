@@ -1,0 +1,29 @@
+<div class = "right-column">
+  <h2> Uploads: </h2>
+    <div class="upload-box">
+      <form id="upload-form" enctype="multipart/form-data">
+        {% for field_name, spec in expected_files.items() %}
+          <div class="upload-field">
+            <label for="{{ field_name }}">{{ spec.label }}:</label>
+            <input type="file" id="{{ field_name }}" name="{{ field_name }}">
+          </div>
+        {% endfor %}
+        <input id = "upload_submission" disabled type="submit"  value="Upload Files">
+      </form>
+      <p id="upload-message"></p>
+
+    </div>
+
+    <div>
+      <p>currently uploaded files:</p>
+      {% for field_name, spec in expected_files.items() %}
+      <p>{{ spec.label }}: <span id="{{ spec.training_flag }}">{{ file_states.get(spec.training_flag, '') }}</span></p>
+      {% endfor %}
+    </div>
+
+    </p>
+
+  </div>
+
+</div>
+

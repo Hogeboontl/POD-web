@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title%} POD Therm Simulator {% endblock %}
+
+{% block header %}
+<div class="header-container">
+  <h1>POD dynamic thermal simulator</h1>
+  <p>
+      This website allows for the training of POD modes that can be used to accurately simulate
+      heat on a mesh after being supplied the appropriate data.
+  </p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+  <div class = "column" >
+    {% set box_title = "training config: " %}
+    {% include "partials/config_box.html" with context %}
+    <button id = "adjust-server-settings"> adjust server settings</button>
+  </div>
+  
+  <div class = "row">
+    <div class="column">
+      <p>POD mode creation</p>
+      <p>workflow:</p>
+      <button id="A-mat-btn" {% if not buttons.compute_A %}disabled{% endif %}>Calculate A matrix</button>
+      <p>↓</p>
+      <button id = "eigenvalue" {% if not buttons.get_eigenvalue%}disabled{% endif %}> generate eigenvalues</button>
+      <p>↓</p>
+      <button id="view-eigen" {% if not buttons.view_eigen %} disabled {% endif %}>View Eigenvalues <br> to determine number of POD modes</button>
+      <p>↓</p>
+      <button id="train-btn" {% if not buttons.train_POD %} disabled {% endif %}>Train POD modes</button>
+      <p id = "status"></p>
+    </div>
+    <p>→</p>
+    <div class = "column">
+      <p>Model construction</p>
+      <p>workflow:</p>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+      <!-- fork lines -->
+        <div style="width: 2px; height: 20px; background: gray;"></div>
+        <div style="width: 80px; height: 2px; background: gray;"></div>
+          <div style="display: flex; gap: 76px;">
+            <div style="width: 2px; height: 20px; background: gray;"></div>
+            <div style="width: 2px; height: 20px; background: gray;"></div>
+          </div>
+      <!-- buttons directly below the lines -->
+      <div style="display: flex; gap: 20px;">
+        <button id="C-mat-btn" {% if not buttons.calculate_C %} disabled {% endif %}>Calculate C matrix</button>
+        <button id="G-mat-btn" {% if not buttons.calculate_G %} disabled {% endif %}>Calculate G matrix</button>
+      </div>
+  
+    </div>
+    </div>
+    <p>→</p>
+    <div class = "column">
+        <p>Simulation</p>
+        <p>workflow:</p>
+        <button id= "P-mat-btn" {% if not buttons.calculate_P %} disabled {% endif %} >Calculate P matrix </button>
+        <p>↓</p>
+        <button id= "simulate-btn" {% if not buttons.solve_ODE %} disabled {% endif %}>Solve ODE </button>
+    </div>
+    <p>→</p>
+    <!-- button margins added manually to match paragraph margins-->
+   <button
+      id="post-process-btn"
+      onclick="window.location.href='/post_processing/render_page'"
+      {% if not buttons.post_process %}disabled{% endif %}
+      style="align-self: flex-start; margin-top: 16px;"
+    >
+      Post process
+   </button>
+  
+  </div>
+  {% include "partials/upload_box.html" %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/manage_workflow.js') }}"></script>
+<script src="{{ url_for('static', filename='js/single_block_workflow.js') }}"></script>
+<script src="{{ url_for('static', filename='js/upload_form.js') }}"></script>
+<script src="{{ url_for('static', filename='js/update_config.js') }}"></script>
+{% endblock %}
+
+
+
+

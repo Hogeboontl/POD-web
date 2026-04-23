@@ -1,0 +1,7 @@
+backenv/
+__pycache__/
+dev_notes.txt
+**/.env
+gunicorn_access.log
+gunicorn_error.log
+*.pem

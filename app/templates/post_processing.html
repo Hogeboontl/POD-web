@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title%} POD post processing {% endblock %}
+
+{% block content %}
+
+    <button onclick="window.location.href='/'" >go back </button>
+
+
+    <div class = "post_processing_container"> 
+
+        <div class = "column"> 
+            <div id = "label">
+                <p>2D heatmap viewer and processor: </p>
+            </div>
+            <p> select a slice axis: </p>
+            <select id="axis-select">
+                <option value="0">X</option>
+                <option value="1">Y</option>
+                <option value="2">Z</option>
+            </select>
+            <p>slice position (snaps to nearest valid value): </p>
+            <input type="number" step = "any"  class = "no-spinner"id="position-input" value="0">
+
+            <script>
+                const axis_select = document.getElementById("axis-select")
+                document.getElementById("position-input").addEventListener("blur", (e) => {
+                    var val = parseFloat(e.target.value);
+                    const bounds = { 0: {{config_args["x"]}}, 1: {{config_args["y"]}}, 2: {{config_args["z"]}} };
+                    const max = bounds[axis_select.value];
+                    if (axis_select.value == 0) {
+                        val = snapToNearest(ux, val);
+                    }
+                    else if (axis_select.value == 1) {
+                        val = snapToNearest(uy, val); 
+                    }
+                    else {
+                        val = snapToNearest(uz, val); 
+                    }
+                    if (isNaN(val)) e.target.value = 0;
+                    else e.target.value = Math.min(Math.max(val, 0), max);
+                });
+            </script>
+                        
+            <p>render selection: </p>
+            <button id = "post_process_slice"> post_process and view slice plane </button>
+
+
+            <button id = "post_process_all" style = "margin-top: auto; "> post process whole mesh and time steps</button>
+        
+            <p id = "status"></p>
+        
+            <button id = "download_whole_mesh" {% if not buttons.download_whole_mesh %} disabled {%endif%}> download whole mesh temps</button>
+        </div>
+        <div class = "column"> 
+            <p>time step: </p>
+            <input type="number" id="timestep-input" min="0" max="{{ config_args["time-steps"] -1 }}" step="1" value="0">
+            <div class = "plot-wrapper">
+                <div id = "external"> </div>
+            </div>
+            <br>
+            <button {%  if not buttons.download_heatmap %} disabled {%endif%} id = "download_heatmap"> download heatmap image </button>
+            <br>
+            <button {%  if not buttons.download_slice_temps %} disabled {%endif%} id = "download_slice_temps"> download slice temps </button>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+ <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="{{ url_for('static', filename='js/manage_workflow.js') }}"></script>
+<script src="{{ url_for('static', filename='js/post_processing.js') }}"></script>
+{% endblock %}

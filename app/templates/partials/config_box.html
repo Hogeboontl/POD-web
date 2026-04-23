@@ -1,0 +1,43 @@
+<div class="config-box">
+    <h2> {{ box_title }}</h2>
+    <form id="config-form">
+      {% for param, entry in config_args['training_config'].items() %}
+        {% if param not in exclude %}
+          {% if entry|length == 2 %}
+            {% set default, description = entry %} <!-- if no metadata provided, just assume it is a number, and attach script to sanitize-->
+            <label for="{{ param }}" title="{{ description }}">{{ param }}:</label>
+            <input 
+              type="number" 
+              step = "any"
+              class = "no-spinner"
+              id="{{ param }}" 
+              name="{{ param }}" 
+              value="{{ submitted_config.get(param, default) }}">
+          {% elif entry|length == 3 %} <!-- otherwise we parse the metadata-->
+            {%set default,description,meta = entry %}
+            <label for="{{ param }}" title="{{ description }}">{{ param }}:</label>
+            {%if meta["type"] == "select" %}
+              <select id = "{{param}}" name="{{ param }}">
+                  {% for opt in meta["options"] %}
+                  <option value = "{{opt}}" {% if opt == submitted_config.get(param, default) %}selected{% endif %} > 
+                    {{opt}}
+                  </option>
+                  {%endfor %}
+              </select>
+            {% else %} <!-- if type of data not given, just assume its a number-->
+              <input 
+              type="number" 
+              step = "any"
+              class = "no-spinner"
+              id="{{ param }}" 
+              name="{{ param }}" 
+              value="{{ submitted_config.get(param, default) }}">
+
+            {%endif%}
+
+          {% endif %}
+
+        {%endif %}
+      {% endfor %}
+    </form>
+  </div>

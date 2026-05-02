@@ -173,9 +173,7 @@ Nginx and Gunicorn are required for secure deployment. A gunicorn_config.py file
 
 For initial installation and setup of the daemon, refer to: https://betterstack.com/community/guides/scaling-python/gunicorn-explained/
 
-Additional modifications are required for this project, which are noted below and taken care of in the example nginx config.
-
-An example nginx config file is provided below, as a status stream configuration also needs to be set:
+An example nginx config file is provided below:
 ```
 server {
     listen 80;
@@ -243,7 +241,7 @@ The gunicorn_config.py file also defines a timeout, which may need to be adjuste
 
 This configuration assumes HTTPS is enabled and requires an SSL certificate. Replace ssl_certificate and ssl_certificate_key with the appropriate paths for your environment.
 
-For production deployments, using Certbot with a valid domain is recommended. For local development or testing, a self-signed certificate can be used instead.
+For production deployments, using Certbot with a valid domain is recommended. For local development or testing, a self-signed certificate can be used instead, which can be made with mkcert.
 
 
 

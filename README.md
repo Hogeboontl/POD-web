@@ -167,12 +167,86 @@ server {
 }
 
 ```
+## Gunicorn and Nginx
+
+Nginx and Gunicorn are required for secure deployment. A gunicorn_config.py file is included in the repository, and a basic Nginx configuration template is provided below.
+
+For initial installation and setup of the daemon, refer to: https://betterstack.com/community/guides/scaling-python/gunicorn-explained/
+
+Additional modifications are required for this project, which are noted below and taken care of in the example nginx config.
+
+An example nginx config file is provided below, as a status stream configuration also needs to be set:
+```
+server {
+    listen 80;
+    server_name _;
+
+    return 301 https://$host$request_uri;
+}
 
 
-Enabling https for the server is entirely based on the Nginx configuration and whether the site has a domain name available to it.
-If a domain name is available, following the certbot guide for nginx is recommended.
+server {
+    listen 443 ssl default_server;
+    server_name _;
 
-Otherwise, use the above configuration with mkcert for self certification.
+    ssl_certificate YOUR/CERT/KEY;
+    ssl_certificate_key YOUR/CERT/KEY/PATH;
+        
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    client_max_body_size 0;
+    proxy_read_timeout 3000;
+    proxy_connect_timeout 3000;
+    proxy_send_timeout 3000;
+    client_body_timeout 3000;
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location /job-status-stream  {
+        proxy_pass http://127.0.0.1:8000;
+
+        # Disable buffering - critical for SSE
+        proxy_buffering off;
+        proxy_cache off;
+
+         # SSE headers
+        proxy_set_header Connection '';
+        proxy_http_version 1.1;
+        chunked_transfer_encoding on;
+
+        #Keep connection alive
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+
+    location /static/ {
+        alias /YOUR/STATIC/DIRECTORY;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}
+
+```
+
+This configuration extends connection timeouts (see proxy_read_timeout, proxy_send_timeout, etc.) and adds a /job-status-stream route for Server-Sent Events (SSE), both of which are not covered in the guide above.
+
+The timeout values may need to be increased or decreased depending on the size and duration of requests. The status stream currently relies on extended timeouts rather than explicit keep-alive (heartbeat) messages.
+
+The gunicorn_config.py file also defines a timeout, which may need to be adjusted depending on deployment requirements.
+
+This configuration assumes HTTPS is enabled and requires an SSL certificate. Replace ssl_certificate and ssl_certificate_key with the appropriate paths for your environment.
+
+For production deployments, using Certbot with a valid domain is recommended. For local development or testing, a self-signed certificate can be used instead.
+
+
+
 
 
 

@@ -13,6 +13,13 @@ The repostory for `pod-web-scheduler` can be found here: https://github.com/Hoge
 - **MySQL** — used for storing user data
 - **Redis** — used as the Celery message broker
 
+### start-up order 
+1. Redis
+2. Slurm services
+3. Celery worker (slurm_scheduler user)
+4. Gunicorn (web user)
+5. Nginx
+
 ### Python Environments
 
 One  Python environment is required for this repository:
@@ -39,6 +46,8 @@ sudo groupadd podweb_shared
 sudo usermod -aG podweb_shared podwebuser
 sudo usermod -aG podweb_shared slurmrunner
 ```
+
+This was designed with both the web service and scheduler running on the head node.
 
 
 ---
@@ -91,82 +100,7 @@ For the website to properly authenticate users and create accounts, the applicat
 
 ---
 
-## Gunicorn and Nginx
 
-Nginx and Gunicorn are required for the code to run securely. To install and configure them, follow the guide here: https://betterstack.com/community/guides/scaling-python/gunicorn-explained/
-
-When setting up Nginx, make sure to increase the maximum allowed file size using `client_max_body_size 0;`. 
-
-With this, also make sure to increase the timeout as file uploads are not timeout safe while running, this can be done with 
-```
-proxy_read_timeout 300;
-proxy_connect_timeout 300;
-proxy_send_timeout 300;
-client_body_timeout 300;
-```
-
-The `gunicorn_config.py` has a timeout on it as well that may need to be 
-increased or decreased depending on specifications.
-
-An example nginx config file is provided below, as a status stream configuration also needs to be set:
-```
-server {
-    listen 80;
-    server_name _;
-
-    return 301 https://$host$request_uri;
-}
-
-
-server {
-    listen 443 ssl default_server;
-    server_name _;
-
-    ssl_certificate YOUR/CERT/KEY;
-    ssl_certificate_key YOUR/CERT/KEY/PATH;
-        
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    client_max_body_size 0;
-    proxy_read_timeout 3000;
-    proxy_connect_timeout 3000;
-    proxy_send_timeout 3000;
-    client_body_timeout 3000;
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    location /job-status-stream  {
-        proxy_pass http://127.0.0.1:8000;
-
-        # Disable buffering - critical for SSE
-        proxy_buffering off;
-        proxy_cache off;
-
-         # SSE headers
-        proxy_set_header Connection '';
-        proxy_http_version 1.1;
-        chunked_transfer_encoding on;
-
-        #Keep connection alive
-        proxy_read_timeout 3600s;
-        proxy_send_timeout 3600s;
-    }
-
-    location /static/ {
-        alias /YOUR/STATIC/DIRECTORY;
-    }
-
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-    }
-}
-
-```
 ## Gunicorn and Nginx
 
 Nginx and Gunicorn are required for secure deployment. A gunicorn_config.py file is included in the repository, and a basic Nginx configuration template is provided below.

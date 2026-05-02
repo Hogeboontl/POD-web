@@ -56,6 +56,10 @@ This was designed with both the web service and scheduler running on the head no
 
 The `POD-web` folder should be placed in the user directory that will serve as the web host.
 
+### redis
+
+The redis set up can be found within the `pod-web-scheduler` repository.
+
 ### Environment Configuration
 
 A `.env` file must be created to store all sensitive data such as keys, passwords, and directories. The required variables are:
